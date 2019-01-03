@@ -40,6 +40,13 @@ namespace MusicStore.Controllers
                 return Json("nologin");
             //2.判断用户是否对这条回复点过赞或踩
 
+            //取出用户ID
+            var person = _context.Persons.Find((Session["LoginUserSessionModel"] as
+            LoginUserSessionModel).Person.ID);
+            //查询该评论信息
+            var reply = _context.Replies.Find(id);
+            var like = _context.LikeReplies.SingleOrDefault(x => x.Person.ID == person.ID && x.Reply.ID == reply.ID);
+
             //3.保存 reply是体重Like+1或Hate+1 LikeReply添加一条记录
 
             //生成HTML注入视图
@@ -128,12 +135,30 @@ namespace MusicStore.Controllers
             htmlString += "<div class=\"modal-header\">";
             htmlString += "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>";
             htmlString += "<h4 class=\"modal-title\" id=\"myModalLabel\">";
-            htmlString += "<em>楼主</em>" + pcmt.Person.Name + "  发表于" + 
-                pcmt.CreateDateTime.ToString("yyyy年MM月dd日hh点mm分ss秒") + ":<br/>" + pcmt.Content;
+            htmlString += "<em>楼主&nbsp;&nbsp;</em>" + pcmt.Person.Name + "&nbsp;&nbsp;发表于" + pcmt.CreateDateTime.ToString("yyyy年MM月dd日 hh点mm分ss秒") + ":<br/>" + pcmt.Content;
             htmlString += " </h4> </div>";
 
             htmlString += "<div class=\"modal-body\">";
             //子回复
+            htmlString += "<ul class='media-list' style='margin-left:20px;'>";
+            foreach (var item in cmts)
+            {
+                htmlString += "<li class='media'>";
+                htmlString += "<div class='media-left'>";
+                htmlString += "<img class='media-object' src='" + item.Person.Avarda +
+                              "' alt='头像' style='width:40px;border-radius:50%;'>";
+                htmlString += "</div>";
+                htmlString += "<div class='media-body' id='Content-" + item.ID + "'>";
+                htmlString += "<h5 class='media-heading'><em>" + item.Person.Name + "</em>&nbsp;&nbsp;发表于" +
+                              item.CreateDateTime.ToString("yyyy年MM月dd日 hh点mm分ss秒") + "</h5>";
+                htmlString += item.Content;
+                htmlString += "</div>";
+                htmlString += "<h6><a href='#div-editor' class='reply' onclick=\"javascript:GetQuote('" + item.ParentReply.ID + "','" + item.ID + "');\">回复</a>" +
+                              "<a href='#' class='reply' style='margin:0 20px 0 40px'   onclick=\"javascript:Like('" + item.ID + "');\"><i class='glyphicon glyphicon-thumbs-up'></i>(" + item.Like + ")</a>" +
+                              "<a href='#' class='reply' style='margin:0 20px'   onclick=\"javascript:Hate('" + item.ID + "');\"><i class='glyphicon glyphicon-thumbs-down'></i>(" + item.Hate + ")</a></h6>";
+                htmlString += "</li>";
+            }
+            htmlString += "</ul>";
             htmlString += "</div><div class=\"modal-footer\"></div>";
             return Json(htmlString);
         }
