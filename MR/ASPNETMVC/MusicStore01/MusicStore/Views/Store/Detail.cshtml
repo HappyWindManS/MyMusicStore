@@ -136,27 +136,53 @@
         });
     }
 
-    //点赞
-     function Like(id) {
+     //点赞
+    function Like(id) {
         $.ajax({
-            type: 'post',
+            type: "post",
             asyn: true,
             url: '@Url.Action("Like","Store")',
-            data: { "id": id },
+            data: {
+                "pid": id
+            },
             dataType: 'json',
             success: function (data) {
-                if (data.Status == 'noLogin') {
-                    //如果没登录
-                    location.href = "@Url.Action("login","Account",
-                                    new {returnUrl=Url.Action("Detail","Store",new {id= Model.ID})})";
-                } else if (data.Status == 'Parent') {
-                    //html文本注入div
-                    $("#divCmt").html(data.html);
+                //登录
+                if (data.Status == "noLogin") {
+                    location.href = "@Url.Action("login", "Account",
+                                         new {returnUrl = Url.Action("Detail", "Store", new {id = Model.ID})})";
                 }
-                else if (data.Status == 'Son') {
-                    $("#Div-SonCmts").html(data.html);
-                    //$('#myModal').modal('toggle');
+                else if (data.Status != "false")
+                    if (data.Status == "Parent") {
+                        $('#divCmt').html(data.Html);//detail
+                    } else if (data.Status == 'Son') {
+                        $("#Div-SonCmts").html(data.Html);//modal
+                    }
+            }
+        });
+    }
+    //踩
+    function Hate(id) {
+        $.ajax({
+            type: "post",
+            asyn: true,
+            url: '@Url.Action("Hate","Store")',
+            data: {
+                "pid": id
+            },
+            dataType: 'json',
+            success: function (data) {
+                //登录
+                if (data.Status == "noLogin") {
+                    location.href = "@Url.Action("login", "Account",
+                                         new {returnUrl = Url.Action("Detail", "Store", new {id = Model.ID})})";
                 }
+                else if (data.Status != "false")
+                    if (data.Status == "Parent") {
+                        $('#divCmt').html(data.Html);//主视图
+                    } else if (data.Status == 'Son') {
+                        $("#Div-SonCmts").html(data.Html);//子回复，模态框
+                    }
             }
         });
     }
